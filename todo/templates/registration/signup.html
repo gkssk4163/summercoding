@@ -1,0 +1,32 @@
+{% extends 'todo/base.html' %}
+
+{% block content %}
+<div class="wrapper shadow">
+	<h2 class="mb-3">회원가입</h2>
+	<form method="POST" action="">
+		{% csrf_token %}
+		<div class="table-responsive">
+			<table class="table table-bordered text-nowrap">
+				{% for field in form %}
+				<tr>
+					<td{% if field.help_text %} rowspan="2"{% endif %}>{{ field.label }}</td>
+					<td>{{ field }}</td>
+				</tr>
+				{% if field.help_text %}
+				<tr>
+					<td>{{ field.help_text }}</td>
+				</tr>
+				{% endif %}
+				{% if field.errors %}
+				<tr><td colspan="2"><strong class="text-danger">{{ field.errors|striptags }}</strong></td><tr>
+				{% endif %}
+				{% endfor %}
+			</table>
+		</div>
+		<div class="text-center">
+			<button class="btn btn-lg btn-primary btn-regist" type="submit">가입완료</button>
+			<a class="btn btn-lg btn-primary btn-regist" href="{% url 'main' %}" onclick="return cancelCheck();">취소</a>
+		</div>
+	</form>
+</div>
+{% endblock %}

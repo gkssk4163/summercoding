@@ -1,0 +1,31 @@
+.wrapper {
+	max-width: 100%;
+	padding: 20px 30px;
+	margin: 20px auto;
+}
+
+.alert-wrapper {
+	max-width: 100%;
+	margin: 10px auto;
+}
+
+.form-signin {
+	max-width: 400px;
+	padding: 20px 30px;
+	margin: auto auto;
+}
+
+.card-link.active {
+	font-weight:bold;
+	color:#495057;
+	background-color:#fff;
+	border-color:#dee2e6 #dee2e6 #fff;
+}
+
+.btn-regist {
+	width: 49%;
+}
+
+.table thead th {
+	border-top: 0px;
+}

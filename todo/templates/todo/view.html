@@ -1,0 +1,45 @@
+{% extends 'todo/base.html' %}
+
+{% block content %}
+<div class="wrapper shadow">
+	<h2 class="mb-3">TODO 조회</h2>
+		<div class="table-responsive">
+			<table class="table table-bordered text-nowrap">
+				<colgroup>
+					<col width="10%"/>
+					<col width="90%"/>
+				</colgroup>
+				<tr>
+					<td class="text-center">제목</td>
+					<td>{{ todo.title }}</td>
+				</tr>
+				<tr height="200px">
+					<td class="text-center">내용</td>
+					<td><pre style="white-space: pre-wrap;">{{ todo.context }}</pre></td>
+				</tr>
+				<tr>
+					<td class="text-center">우선순위</td>
+					<td>{{ todo.get_priority_display }}</td>
+				</tr>
+				<tr>
+					<td class="text-center">마감기한</td>
+					<td>{{ todo.deadline|date:"Y-m-d" }}</td>
+				</tr>
+			</table>
+		</div>
+		<div class="clearfix">
+			<div class="float-left">
+			<a class="btn btn-primary px-4" href="{% url 'todo_list' %}">목록</a>
+			</div>
+			<div class="float-right">
+			{% if not todo.completed_date %}
+			<a class="btn btn-primary px-4" href="{% url 'todo_edit' pk=pk %}">수정</a>
+			<a class="btn btn-primary px-4" href="{% url 'todo_complete' pk=pk %}">완료</a>
+			{% else %}
+			<a class="btn btn-primary px-4" href="{% url 'undo_complete' pk=pk %}">완료취소</a>
+			{% endif %}
+			<a class="btn btn-primary px-4" href="{% url 'todo_delete' pk=pk %}" onclick="return deleteCheck();">삭제</a>
+			</div>
+		</div>
+</div>
+{% endblock %}

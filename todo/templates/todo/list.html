@@ -1,0 +1,150 @@
+{% extends 'todo/base.html' %}
+
+{% block content %}
+{% if incompleted_count and filter1 != 'incompleted' %}
+<div class="alert-wrapper alert alert-light alert-dismissible">
+	<button type="button" class="close" data-dismiss="alert" aria-label="close">&times;</button>
+	<a href="?filter1=incompleted&filter2=after&column={{column}}&sort={{sort}}" class="alert-link">마감기한 내에 완료하지 못한 TODO({{ incompleted_count }})</strong></a>가 있습니다.
+</div>
+{% endif %}
+
+<div class="wrapper shadow">
+	<a class="btn btn-primary mb-2" href="{% url 'todo_create' %}">TODO 추가</a>
+	<div class="card">
+		<div class="card-body py-2">
+			<a class="card-link {% if filter1 == 'all' %}active{% endif %}" href="?filter1=all&filter2=all&column={{column}}&sort={{sort}}">전체</a>
+			<a class="card-link {% if filter1 == 'completed' %}active{% endif %}" href="?filter1=completed&filter2=all&column={{column}}&sort={{sort}}">완료</a>
+			<a class="card-link {% if filter1 == 'incompleted' %}active{% endif %}" href="?filter1=incompleted&filter2=all&column={{column}}&sort={{sort}}">미완료</a>
+		</div>
+	</div>
+	<ul class="nav nav-tabs mt-2">
+		<li class="nav-item">
+			<a class="nav-link px-3 py-1 {% if filter2 == 'all' %}active{% endif %}" href="?filter1={{filter1}}&filter2=all&column={{column}}&sort={{sort}}">전체</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link px-3 py-1 {% if filter2 == 'none' %}active{% endif %}" href="?filter1={{filter1}}&filter2=none&column={{column}}&sort={{sort}}">마감없음</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link px-3 py-1 {% if filter2 == 'before' %}active{% endif %}" href="?filter1={{filter1}}&filter2=before&column={{column}}&sort={{sort}}">마감전</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link px-3 py-1 {% if filter2 == 'after' %}active{% endif %}" href="?filter1={{filter1}}&filter2=after&column={{column}}&sort={{sort}}">마감지남</a>
+		</li>
+	</ul>
+	<form id="listForm" method="POST" action="">
+		<input type="hidden" name="filter1" value="{{ filter1 }}"/>
+		<input type="hidden" name="filter2" value="{{ filter2 }}"/>
+		<input type="hidden" name="column" value="{{ column }}"/>
+		<input type="hidden" name="sort" value="{{ sort }}"/>
+		<input type="hidden" name="mode" value=""/>
+		{% csrf_token %}
+		<div class="table-responsive">
+			<table class="table text-center text-nowrap">
+				<colgroup>
+					<col width="5%"/>
+					<col width="10%"/>
+					<col width="10%"/>
+					<col />
+					<col width="20%"/>
+					<col width="10%"/>
+				</colgroup>
+				<thead>
+					<tr>
+						<th><input type="checkbox" name="checkAll"/></th>
+						<th>등록일자
+							<a href="?filter1={{filter1}}&filter2={{filter2}}&column=pk&sort=">▲</a><a href="?filter1={{filter1}}&filter2={{filter2}}&column=pk&sort=-">▼</a>
+						</th>
+						<th>우선순위
+							<a href="?filter1={{filter1}}&filter2={{filter2}}&column=priority&sort=">▲</a><a href="?filter1={{filter1}}&filter2={{filter2}}&column=priority&sort=-">▼</a>
+						</th>
+						<th>제목</th>
+						<th>마감기한
+							<a href="?filter1={{filter1}}&filter2={{filter2}}&column=deadline&sort=">▲</a><a href="?filter1={{filter1}}&filter2={{filter2}}&column=deadline&sort=-">▼</a>
+						</th>
+						<th>상태</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if not lists %}
+					<tr>
+						<td colspan="6">등록된 TODO가 없습니다.</td>
+					</tr>
+					{% else %}
+					{% for list in lists %}
+					<tr>
+						<td><input type="checkbox" name="checkOne" value="{{ list.pk }}"/></td>
+						<td>{{ list.created_date|date:"Y-m-d" }}</td>
+						<!--<td>{% if column == 'pk' and sort == '-' %}{{ forloop.revcounter }}{% else %}{{ forloop.counter }}{% endif %}</td>-->
+						<td>{{ list.get_priority_display }}</td>
+						<td class="text-left" style="text-overflow:ellipsis;overflow:hidden;" title="{{ list }}"><a href="{% url 'todo_view' pk=list.pk %}">{{ list }}</a></td>
+						<td>{{ list.deadline|date:"Y-m-d" }}</td>
+						{% if list.completed_date %}
+						<td>
+							<strong class="text-success">완료</strong>
+						</td>
+						{% else %}
+						<td>
+							<strong class="text-danger">미완료</strong>
+						</td>
+						{% endif %}
+					</tr>
+					{% endfor %}
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+		<div class="clearfix">
+			<input type="button" class="btn btn-primary px-5" onClick="setMode('complete');" value="완료"/>
+			<input type="button" class="btn btn-primary px-5" onClick="setMode('delete');" value="삭제"/>
+		</div>
+	</form>
+</div>
+<script type="text/javascript">
+function allCheckFunc( obj ) {
+	$("[name=checkOne]").prop("checked", $(obj).prop("checked") );
+}
+
+function oneCheckFunc( obj )
+{
+	var allObj = $("[name=checkAll]");
+	var objName = $(obj).attr("name");
+	
+	if( $(obj).prop("checked") )
+	{
+		checkBoxLength = $("[name="+ objName +"]").length;
+		checkedLength = $("[name="+ objName +"]:checked").length;
+		
+		if( checkBoxLength == checkedLength ) {
+			allObj.prop("checked", true);
+		} else {
+			allObj.prop("checked", false);
+		}
+	}
+	else
+	{
+		allObj.prop("checked", false);
+	}
+}
+
+$(function(){
+	$("[name=checkAll]").click(function(){
+		allCheckFunc( this );
+	});
+	$("[name=checkOne]").each(function(){
+		$(this).click(function(){
+			oneCheckFunc( $(this) );
+		});
+	});
+});
+
+function setMode(mode) {
+	if(!$("input:checkbox[name='checkOne']").is(":checked")){
+		alert("선택된 TODO가 없습니다.");
+		return 0;
+	}
+	var frm = document.getElementById("listForm");
+	frm.mode.value = mode;
+	frm.submit();
+}
+</script>
+{% endblock %}
